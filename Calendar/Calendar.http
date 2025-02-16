@@ -1,0 +1,22 @@
+@Calendar_HostAddress = http://localhost:5231
+
+POST {{Calendar_HostAddress}}/api/calendar/add-event
+Content-Type: application/json
+
+{
+    "title": "Team Meeting",
+    "start": "2025-02-05T10:00:00",
+    "end": "2025-02-05T11:30:00"
+}
+
+###
+GET {{Calendar_HostAddress}}/api/calendar/free-slots-within-working-hours?dayStart=2025-02-05T00:00:00&dayEnd=2025-02-05T23:59:59
+Accept: application/json
+
+
+###
+GET {{Calendar_HostAddress}}/api/calendar/events
+Accept: application/json
+
+
+
