@@ -1,5 +1,8 @@
-﻿using Itenso.TimePeriod;
+﻿// Ignore Spelling: startdate
+
+using Itenso.TimePeriod;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace Calendar.Controllers
 {
@@ -36,18 +39,30 @@ namespace Calendar.Controllers
         [HttpGet("free-slots-within-working-hours")]
         public IActionResult FindFreeSlotsWithinWorkingHours([FromQuery] DateTime dayStart, [FromQuery] DateTime dayEnd)
         {
-            TimeRange workingHours = new TimeRange(
-                new DateTime(2025, 2, 5, 9, 0, 0),
-                new DateTime(2025, 2, 5, 17, 0, 0)
-            );
+            TimeRange workingHours = new(dayStart,dayEnd);
+
             var freeSlots = CalendarHelper.FindFreeSlotsWithinWorkingHours(_events, workingHours);
             return Ok(freeSlots.Select(slot => new { slot.Start, slot.End }));
         }
 
-        // recuring events
-        // update
-        // delete
-        // get event details by id
-        // get events by date
+        [HttpPost("daily-recurrence-events")]
+        public IActionResult CreateDailyRecurrencePattern([FromBody] RecurrenceEvent recurrenceEvent) 
+        {
+           var recurrenceTimeCollection =  CalendarHelper.CreateDailyRecurrencePattern(recurrenceEvent.DayStart, recurrenceEvent.PeriodInHours, recurrenceEvent.TotalWeekdays);
+
+            List<CalendarEvent> events = recurrenceTimeCollection.Select(x =>
+                                                                       new CalendarEvent
+                                                                        {
+                                                                            Title = recurrenceEvent.Title,
+                                                                            Start = x.Start,
+                                                                            End = x.End
+                                                                        }).ToList();
+
+            _events.AddRange(events);
+            return Ok(_events);
+        }
+        
+
+
     }
 }

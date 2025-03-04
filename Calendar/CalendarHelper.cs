@@ -1,4 +1,5 @@
 ﻿using Itenso.TimePeriod;
+using System.Globalization;
 
 namespace Calendar;
 
@@ -34,7 +35,7 @@ public class CalendarHelper
         ITimePeriodCollection gaps = gapCalculator.GetGaps(busyPeriods);
 
 
-        
+
         return gaps
             .Where(gap => gap.Start >= dayStart && gap.End <= dayEnd)
             .Cast<TimeRange>()
@@ -42,12 +43,12 @@ public class CalendarHelper
     }
 
 
-    public static List<TimeRange> FindFreeSlotsWithinWorkingHours(List<CalendarEvent> events,TimeRange workingHours)
+    public static List<TimeRange> FindFreeSlotsWithinWorkingHours(List<CalendarEvent> events, TimeRange workingHours)
     {
         // Sort events by start time to process them sequentially
-        events = events.OrderBy(e => e.Start).ToList();
+        events = [.. events.OrderBy(e => e.Start)];
 
-        List<TimeRange> freeSlots = new List<TimeRange>();
+        List<TimeRange> freeSlots = [];
 
         // Track the current pointer for working hours
         DateTime currentPointer = workingHours.Start;
@@ -84,5 +85,42 @@ public class CalendarHelper
         return freeSlots;
     }
 
-}
 
+    public static TimePeriodCollection CreateDailyRecurrencePattern(DateTime startDate, int PeriodInHours, int totalWeekdays)
+    {
+        // Calculate the end date, excluding weekends
+        DateTime currentDate = startDate;
+        int weekdayCount = 0;
+
+        while (weekdayCount < totalWeekdays)
+        {
+            // Exclude weekends (Saturday and Sunday)
+            if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+                weekdayCount++;
+
+            // Move to the next day
+            if (weekdayCount < totalWeekdays)
+                currentDate = currentDate.AddDays(1);
+
+        }
+
+        DateTime endDate = currentDate; // End date with weekends excluded
+
+        // Create a TimePeriodCollection to store the occurrences
+        TimePeriodCollection occurrences = [];
+
+        // Generate weekday occurrences
+        DateTime nextOccurrence = startDate;
+        while (nextOccurrence <= endDate)
+        {
+            // Exclude weekends (Saturday and Sunday)
+            if (nextOccurrence.DayOfWeek != DayOfWeek.Saturday && nextOccurrence.DayOfWeek != DayOfWeek.Sunday)
+                occurrences.Add(new TimeRange(nextOccurrence, nextOccurrence.AddHours(PeriodInHours))); // 1-hour events
+            
+            // Move to the next day
+            nextOccurrence = nextOccurrence.AddDays(1);
+        }
+
+        return occurrences;
+    }
+}
