@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ###
-GET {{Calendar_HostAddress}}/api/calendar/free-slots-within-working-hours?dayStart=2025-03-04T09:00:00&dayEnd=2025-03-17T17:00:00
+GET {{Calendar_HostAddress}}/api/calendar/free-slots-within-working-hours?dayStart=2025-03-04T09:00:00&dayEnd=2025-03-04T17:00:00
 Accept: application/json
 
 
